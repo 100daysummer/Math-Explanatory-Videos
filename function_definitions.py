@@ -127,18 +127,62 @@ class part_2(Scene):
     def construct(self):
         self.camera.background_color = BACKGROUND_COLOR
 
-        function_text_original = MathTex("f(x)", color=BEIGE_COLOR).scale(2.5)
-        self.add(function_text_original)
-
-        function_text_target = MathTex("f(x)", color=BEIGE_COLOR).scale(2.5).to_edge(LEFT)
-        function_text_original.generate_target()
-        function_text_original.target = function_text_target
-
-        equals_sign = MathTex("=", color=BEIGE_COLOR).scale(2.5).next_to(function_text_target, RIGHT)
+        text_part_1 = MathTex("f(x) ", color=BEIGE_COLOR).scale(2.5)
+    
+        self.add(text_part_1)
+        
+        text_part_1_2 = MathTex("f(x) ", color=BEIGE_COLOR).scale(2.5)
+        text_part_2_2 = MathTex(" = ", color=BEIGE_COLOR).scale(2.5).next_to(text_part_1_2, RIGHT, 0.2 + 0.45).shift(DOWN * 0.075)
+        text_part_3_2 = MathTex("y", color=BEIGE_COLOR).scale(2.5).next_to(text_part_2_2, RIGHT, 0.2 + 0.45).shift(DOWN * 0.075)
+        
+        text_group_2 = VGroup(text_part_1_2, text_part_2_2, text_part_3_2)
+        text_group_2.center()
 
         self.play(
-            MoveToTarget(function_text_original),
-            Write(equals_sign)
+            text_part_1.animate.shift(text_part_1_2.get_left() - text_part_1.get_left())
+        )
+
+        text_group_2.remove(text_part_1_2)
+
+        self.wait(1)
+
+        self.play(
+            Write(text_group_2)
+        )
+
+        self.wait(1)
+
+        self.play(
+            Circumscribe(text_part_3_2)
+        )
+
+        self.wait(1)
+
+        value_text = Text("Стойност", color=ORANGE_COLOR, font_size=30, slant=ITALIC).next_to(text_part_3_2, DOWN, buff = 1.75)
+        value_arrow = Arrow(start=value_text.get_top(), end=(text_part_3_2.get_bottom()), color=BEIGE_COLOR)
+        
+        self.play(
+            Create(value_arrow),
+            Write(value_text)
+        )
+
+        self.wait(1)
+
+        self.play(
+            Uncreate(value_arrow),
+            Unwrite(value_text)
+        )
+
+        self.wait(1)
+
+        self.play(
+            text_part_2_2.animate.shift(ORIGIN - text_part_1_2.get_center()),
+            text_part_3_2.animate.shift(ORIGIN - text_part_1_2.get_center()),
+            text_part_1.animate.shift(ORIGIN - text_part_1_2.get_center())
+        )
+        self.play(
+            Unwrite(text_part_2_2),
+            Unwrite(text_part_3_2)
         )
 
         self.wait(1)
