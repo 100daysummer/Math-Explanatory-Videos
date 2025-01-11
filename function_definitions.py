@@ -232,3 +232,203 @@ class part_3(Scene):
         )
 
         self.wait(1)
+
+class part_4(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        f_text = MathTex("f:A\\rightarrowB", color=BEIGE_COLOR, tex_to_color_map={"A": GREEN_COLOR, "B": OTHER_BLUE_COLOR}).scale(1.25).to_corner(UL)
+
+        self.play(
+            Write(f_text[:1])
+        )
+        self.wait()
+
+        set_A = Ellipse(
+            width=2,
+            height=4,
+            color=GREEN_COLOR,
+            fill_opacity=0.5,
+            stroke_width=10
+        )
+        set_B = set_A.copy().set_color(OTHER_BLUE_COLOR).shift(4 * RIGHT)
+ 
+        label_A = MathTex("A", color=BEIGE_COLOR)
+        label_A.add_updater(
+            lambda mobject: mobject.next_to(set_A, DOWN)
+        )
+        label_B = MathTex("B", color=BEIGE_COLOR)
+        label_B.add_updater(
+            lambda mobject: mobject.next_to(set_B, DOWN)
+        )
+
+        
+        dots_A = VGroup(
+            Dot(color=BEIGE_COLOR).shift(1.2 * UP),
+            Dot(color=BEIGE_COLOR).shift(0 * UP),
+            Dot(color=BEIGE_COLOR).shift(-1.2 * UP),
+        )
+        dot_labels_A = VGroup(
+            Text("a1", color=BEIGE_COLOR, font_size=35).next_to(dots_A[0], UP),
+            Text("a2", color=BEIGE_COLOR, font_size=35).next_to(dots_A[1], UP),
+            Text("a3", color=BEIGE_COLOR, font_size=35).next_to(dots_A[2], UP)
+        )
+        dot_name_labels_A = VGroup(
+            Text("Антон", color=BEIGE_COLOR, font_size=30).next_to(dots_A[0], UP),
+            Text("Борислав", color=BEIGE_COLOR, font_size=30).next_to(dots_A[1], UP),
+            Text("Гергана", color=BEIGE_COLOR, font_size=30).next_to(dots_A[2], UP)
+        )
+        dots_A.add_updater(
+            lambda asdf: asdf.move_to(set_A.get_center() + DOWN*0.2)
+        )
+        dot_labels_A.add_updater(
+            lambda asdfa: asdfa.move_to(set_A.get_center() + UP*0.2)
+        )
+
+        
+        dots_B = VGroup(
+            Dot(color=BEIGE_COLOR).shift(0.6 * UP),
+            Dot(color=BEIGE_COLOR).shift(0.6 * DOWN)
+        )
+        dot_labels_B = VGroup(
+            Text("b1", color=BEIGE_COLOR, font_size=35).next_to(dots_A[0], UP),
+            Text("b2", color=BEIGE_COLOR, font_size=35).next_to(dots_A[1], UP)
+        )
+        dot_date_labels_B = VGroup(
+            Text("23.04", color=BEIGE_COLOR, font_size=35).next_to(dots_A[0], UP),
+            Text("20.08", color=BEIGE_COLOR, font_size=35).next_to(dots_A[1], UP)
+        )
+        dots_B.add_updater(
+            lambda asdfaa: asdfaa.move_to(set_B.get_center() + DOWN*0.2)
+        )
+        dot_labels_B.add_updater(
+            lambda asdfaaa: asdfaaa.move_to(set_B.get_center() + UP*0.2)
+        )
+
+        self.play(
+            Create(set_A)
+        )
+        self.wait()
+        self.play(
+            Write(label_A),
+            Write(f_text[1])
+        )
+        self.wait()
+
+        set_a_description = Paragraph(
+            "A съдържа всички",
+            "възможни аргументи",
+            line_spacing=0.5, 
+            t2c={"A": GREEN_COLOR},
+            t2s={"A": ITALIC},
+            font_size=26,
+            alignment="center",
+            color=BEIGE_COLOR
+        ).next_to(f_text, DOWN, buff=0.625).to_edge(LEFT)
+        set_b_description = Paragraph(
+            "B съдържа всички",
+            "възможни стойности",
+            line_spacing=0.5,
+            t2c={"B": OTHER_BLUE_COLOR},
+            t2s={"B": ITALIC},
+            font_size=26,
+            alignment="center",
+            color=BEIGE_COLOR
+        ).next_to(set_a_description, RIGHT, buff=0.5).align_to(set_a_description.get_top(), UP)
+        self.play(
+            Write(set_a_description),
+            Write(dot_labels_A),
+            Create(dots_A)
+        )
+
+        self.wait()
+        self.play(set_A.animate.next_to(set_a_description, DOWN, buff=0.5))
+        self.wait()
+
+        self.play(
+            Create(set_B)
+        )
+        self.play(
+            Write(label_B),
+            Write(f_text[2:])
+        )
+
+        self.play(
+            Write(set_b_description),
+            Write(dot_labels_B),
+            Create(dots_B)
+        )
+        self.wait()
+
+        self.play(
+            set_B.animate.next_to(set_b_description, DOWN, buff=0.5)
+        )
+        self.wait()
+
+        arrow_1 = Arrow(start=dots_A[0].get_center(), end=dots_B[0].get_center(), color=LIGHTER_BLUE_COLOR)
+        arrow_2 = Arrow(start=dots_A[1].get_center(), end=dots_B[1].get_center(), color=LIGHTER_BLUE_COLOR)
+        arrow_3 = Arrow(start=dots_A[2].get_center(), end=dots_B[1].get_center(), color=LIGHTER_BLUE_COLOR)
+        arrows = VGroup(arrow_1, arrow_2, arrow_3)       
+        self.play(
+            AnimationGroup(
+                Create(arrow_1),
+                Create(arrow_2),
+                Create(arrow_3),
+                lag_ratio=1
+            )
+        )
+        self.wait()
+
+        
+        other_description = Paragraph(
+            "Еднозначността е, че",
+            "елемент от A се съпоставя",
+            "с точно един елемент от B",
+            line_spacing=0.5,
+            t2c={"Еднозначността": BLUE_COLOR, "A": GREEN_COLOR, "B": OTHER_BLUE_COLOR},
+            t2s={"A": ITALIC, "B": ITALIC},
+            font_size=30,
+            alignment="right",
+            color=BEIGE_COLOR
+        ).to_edge(RIGHT)
+
+        self.play(Write(other_description))
+        self.wait()
+
+        dot_name_labels_A.move_to(dot_labels_A.get_center())
+        dot_labels_A.clear_updaters()
+        self.play(
+            *[Transform(dot_labels_A[i], dot_name_labels_A[i]) for i in range(3)]
+        )
+
+        self.wait()
+
+        dot_date_labels_B.move_to(dot_labels_B.get_center())
+        dot_labels_B.clear_updaters()
+        self.play(
+            *[Transform(dot_labels_B[i], dot_date_labels_B[i]) for i in range(2)]
+        )
+
+        self.wait()
+
+        label_A.clear_updaters()
+        label_B.clear_updaters()
+        dots_A.clear_updaters()
+        dots_B.clear_updaters()
+        self.play(
+            Uncreate(set_A),
+            Uncreate(set_B),
+            Unwrite(set_a_description),
+            Unwrite(set_b_description),
+            Unwrite(other_description),
+            Uncreate(dots_A),
+            Uncreate(dots_B),
+            Uncreate(arrows),
+            Unwrite(f_text),
+            Unwrite(dot_labels_A),
+            Unwrite(dot_labels_B),
+            Unwrite(label_A),
+            Unwrite(label_B)
+        )
+
+        self.wait()
