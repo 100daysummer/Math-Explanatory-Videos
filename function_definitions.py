@@ -157,5 +157,67 @@ class part_2(Scene):
         )
         self.wait(1)
 
-        self.play(Unwrite(function_text))
+class part_2_2(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        function_text = MathTex("f(", "x", ")", " = ", "y", color=BEIGE_COLOR).scale(2.5)
+        self.add(function_text)
+        self.wait(1)
+        self.play(Indicate(function_text[1], color=BLUE_COLOR))
+        self.wait(1)
+        function_text_2 = MathTex("f(", "3", ")", " = ", "y", color=BEIGE_COLOR).scale(2.5)
+        self.play(Transform(function_text, function_text_2))
+        self.wait(1)
+
+class part_3(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        text_font_size = 50
+
+        function_text = Text("f(име) = дата", color=BEIGE_COLOR, font_size=text_font_size)
+        self.play(
+            Write(function_text)
+        )
+        self.wait(1)
+        self.play(
+            function_text.animate.to_corner(UL)
+        )
+        self.wait(1)
+        
+        function_text_anton = Text("f(Антон) = 23.04", color=BEIGE_COLOR, font_size=text_font_size)
+        function_text_borislav = Text("f(Борислав) = 20.08", color=BEIGE_COLOR, font_size=text_font_size)
+        function_text_gergana = Text("f(Гергана) = 20.08", color=BEIGE_COLOR, font_size=text_font_size)
+
+        function_text_group = VGroup(function_text_anton, function_text_borislav, function_text_gergana)
+        function_text_group.arrange(DOWN, aligned_edge=LEFT)
+
+        self.play(
+            Write(function_text_anton)
+        )
+        self.wait(1)
+        self.play(
+            Write(function_text_borislav)
+        )
+        self.wait(1)
+        self.play(
+            Write(function_text_gergana)
+        )
+        self.wait(1)
+
+        self.play(
+            Indicate(function_text_borislav[12::], color=BLUE_COLOR),
+            Indicate(function_text_gergana[11::], color=BLUE_COLOR)
+        )
+        self.wait(1)
+
+        self.play(
+            Unwrite(function_text),
+            Unwrite(function_text_anton),
+            Unwrite(function_text_borislav),
+            Unwrite(function_text_gergana),
+            run_time = 1
+        )
+
         self.wait(1)
