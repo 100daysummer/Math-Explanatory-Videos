@@ -81,6 +81,15 @@ class part_1(Scene):
 
         self.wait(1)
 
+        self.play(
+            Unwrite(function_text_begin),
+            Unwrite(middle_object),
+            Unwrite(function_text_end),
+            duration=0.5
+        )
+        self.wait(1)
+        
+
     def remove_object_and_add(self, object_to_remove, object_to_add, left_paranthesis, right_paranthesis, write_or_create_1, write_or_create_2, version):
         if version == 'transform':
             if object_to_remove is not None:
@@ -130,7 +139,7 @@ class part_2(Scene):
         function_text = MathTex("f(x)", " = ", "y", color=BEIGE_COLOR).scale(2.5)
         text_part_1_orig_pos = function_text[0].get_center()
         function_text[0].center()
-        self.add(function_text[0])
+        self.play(Write(function_text[0]))
         self.wait(1)
 
         self.play(
@@ -168,6 +177,8 @@ class part_2_2(Scene):
         self.wait(1)
         function_text_2 = MathTex("f(", "3", ")", " = ", "y", color=BEIGE_COLOR).scale(2.5)
         self.play(Transform(function_text, function_text_2))
+        self.wait(1)
+        self.play(Unwrite(function_text))
         self.wait(1)
 
 class part_3(Scene):
