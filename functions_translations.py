@@ -12,6 +12,9 @@ ORANGE_COLOR = "#ffc375"         # button-hover-bottom-border-color
 YELLOW_COLOR = "#fdff91"     # button-hover-highlight-color
 MORE_BLUE_COLOR = "#4877a0"
 
+"""
+The linear_plot_updater function that 
+"""
 
 class video_intro(Scene):
     def construct(self):
@@ -552,6 +555,158 @@ class vertical_scaling(Scene):
             ).set_color(BEIGE_COLOR)
             .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
             .set_color_by_tex("g(x)", color=ORIG_FUNC_COLOR)
+            #.set_color_by_tex("{:.2f}".format(scaling_factor.get_value()), color=OTHER_FUNC_COLOR)  # Set color for the value part
+            ).next_to(num_plane.get_bottom(), DOWN)
+            .align_to(num_plane.get_left(), LEFT)
+        )
+
+        self.add(num_plane, some_stupid_label)
+        self.add(orig_func_left, orig_func_right)
+        self.add(other_func_left, other_func_right)
+        self.play(orig_func_left_a.animate.set_value(orig_func_left_a.get_value()),
+                  orig_func_right_a.animate.set_value(orig_func_right_a.get_value()),
+                  run_time=0.001)
+        self.wait()
+        self.play(scaling_factor.animate.set_value(3), run_time=1)
+        self.wait()
+        self.play(scaling_factor.animate.set_value(0.5), run_time=1)
+        self.wait()
+        self.play(scaling_factor.animate.set_value(1), run_time=1)
+        self.wait()
+
+# Graphs f(x) = g(x * a)
+class horizontal_scaling(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        left_end = ValueTracker(-5)
+        right_end = ValueTracker(5)
+        mending_point = ValueTracker(-1)
+        
+        def linear_plot_updater(mobj, plane, x_range, y_range, a, b, J, color_to_set_to, is_left = False):
+            if mending_point is not None:
+                if is_left:
+                    x_range = [
+                        x_range[0].get_value(),
+                        x_range[1].get_value() / J.get_value()
+                    ]
+                else:
+                    x_range = [
+                        x_range[0].get_value() / J.get_value(),
+                        x_range[1].get_value()
+                    ]
+            #print(x_range[1], mending_point.get_value())
+            xr = [
+                ((y_range[0]) - b.get_value()) / a.get_value() / J.get_value(),
+                ((y_range[1]) - b.get_value()) / a.get_value() / J.get_value()
+            ]
+            xr.sort() ## is this needed ??
+            xr = [
+                max(xr[0],x_range[0]),
+                min(xr[1],x_range[1])
+            ]
+            mobj.become(
+                plane.plot(
+                    lambda x: (a.get_value() * x * J.get_value() + b.get_value()),
+                    x_range=xr,
+                ).set_color(color_to_set_to)
+            )
+        ## CACHING MESSES THIS UP, BE CAREFUL
+
+        num_plane = always_redraw(
+            lambda:
+            NumberPlane(
+                x_range=[-5, 5, 5],
+                y_range=[-5, 5, 5],
+                x_length=5,
+                y_length=5,
+                faded_line_ratio=5,
+            )
+        )
+
+        # -4x - 8
+        orig_func_left_a = ValueTracker(-4)
+        orig_func_left_b = ValueTracker(-8)
+        # x - 3
+        orig_func_right_a = ValueTracker(1)
+        orig_func_right_b = ValueTracker(-3)
+        other_func_left_a = ValueTracker(-4)
+        other_func_left_b = ValueTracker(-8)
+        other_func_right_a = ValueTracker(1)
+        other_func_right_b = ValueTracker(-3)
+        scaling_factor = ValueTracker(1)
+        empty_tracker = ValueTracker(1)
+
+        orig_func_left = VMobject()
+        orig_func_right = VMobject()
+        other_func_left = VMobject()
+        other_func_right = VMobject()
+
+        ORIG_FUNC_COLOR = MORE_BLUE_COLOR
+        OTHER_FUNC_COLOR = BLUE_COLOR
+
+        orig_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point],
+            y_range=[-5, 5],
+            a=orig_func_left_a,
+            b=orig_func_left_b,
+            J=empty_tracker,
+            color_to_set_to=ORIG_FUNC_COLOR
+        )
+        orig_func_left.add_updater(orig_func_left_updater)
+        
+        orig_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point, right_end],
+            y_range=[-5, 5],
+            a=orig_func_right_a,
+            b=orig_func_right_b,
+            J=empty_tracker,
+            color_to_set_to=ORIG_FUNC_COLOR
+        )
+        orig_func_right.add_updater(orig_func_right_updater)
+        
+        other_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point],
+            y_range=[-5, 5],
+            a=other_func_left_a,
+            b=other_func_left_b,
+            J=scaling_factor,
+            is_left = True,
+            color_to_set_to=OTHER_FUNC_COLOR
+        )
+        other_func_left.add_updater(other_func_left_updater)
+        
+        other_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point, right_end],
+            y_range=[-5, 5],
+            a=other_func_right_a,
+            b=other_func_right_b,
+            J=scaling_factor,
+            color_to_set_to=OTHER_FUNC_COLOR
+        )
+        other_func_right.add_updater(other_func_right_updater)
+
+        some_stupid_label = always_redraw(
+            lambda: (MathTex(
+                "f(x)",
+                "=",
+                "g(x",
+                "*",
+                "{:.2f}".format(scaling_factor.get_value()),
+                ")",
+                font_size=40
+            ).set_color(BEIGE_COLOR)
+            .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+            .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+            .set_color_by_tex("g(x", color=ORIG_FUNC_COLOR)
             #.set_color_by_tex("{:.2f}".format(scaling_factor.get_value()), color=OTHER_FUNC_COLOR)  # Set color for the value part
             ).next_to(num_plane.get_bottom(), DOWN)
             .align_to(num_plane.get_left(), LEFT)
