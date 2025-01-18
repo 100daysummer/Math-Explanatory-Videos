@@ -108,9 +108,7 @@ class testing(Scene):
         # self.play(bla_bla.animate.set_value(5), run_time=5)
         # self.wait()
 
-
-
-class all_transformations(Scene):
+class vertical_translation(Scene):
     def construct(self):
         self.camera.background_color = BACKGROUND_COLOR
 
@@ -123,11 +121,12 @@ class all_transformations(Scene):
                     x_range[0].get_value(),  # Left limit
                     x_range[1].get_value()  # Update dynamically
                 ]
-            print(x_range[1], mending_point.get_value())
-            xr = [
-                (y_range[0]-b.get_value())/a.get_value(),
-                (y_range[1]-b.get_value())/a.get_value()
-            ]
+            #print(x_range[1], mending_point.get_value())
+            from decimal import Decimal
+            xr = np.array([
+                float(Decimal(y_range[0] - b.get_value()) / Decimal(a.get_value())),
+                float(Decimal(y_range[1] - b.get_value()) / Decimal(a.get_value()))
+            ])
             xr.sort()
             xr = [
                 max(xr[0],x_range[0]),
@@ -141,16 +140,21 @@ class all_transformations(Scene):
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
 
-        num_plane = NumberPlane(
-            x_range=[-5, 5, 5],
-            y_range=[-5, 5, 5],
-            x_length=5,
-            y_length=5,
-            faded_line_ratio=5,
+        num_plane = always_redraw(
+            lambda:
+            NumberPlane(
+                x_range=[-5, 5, 5],
+                y_range=[-5, 5, 5],
+                x_length=5,
+                y_length=5,
+                faded_line_ratio=5,
+            )
         )
 
+        # -4x - 8
         orig_func_left_a = ValueTracker(-4)
         orig_func_left_b = ValueTracker(-8)
+        # x - 3
         orig_func_right_a = ValueTracker(1)
         orig_func_right_b = ValueTracker(-3)
         other_func_left_a = ValueTracker(-4)
@@ -173,12 +177,12 @@ class all_transformations(Scene):
         other_func_right.add_updater(other_func_right_updater)
 
         some_stupid_label = always_redraw(
-            lambda: MathTex(
+            lambda: (MathTex(
                 ("f(x) = g(x) " + ("+" if other_func_left_b.get_value() - orig_func_left_b.get_value() >= 0 else "-")), "{:.2f}".format(abs(other_func_left_b.get_value() - orig_func_left_b.get_value())),
                 font_size=40
             ).set_color_by_tex("f(x)", color=BEIGE_COLOR)
             .set_color_by_tex("{:.2f}".format(abs(other_func_left_b.get_value() - orig_func_left_b.get_value())), color=OTHER_BLUE_COLOR)  # Set color for the value part
-            .next_to(num_plane.get_bottom(), DOWN)
+            ).next_to(num_plane.get_bottom(), DOWN)
             .align_to(num_plane.get_left(), LEFT)
         )
 
@@ -188,18 +192,180 @@ class all_transformations(Scene):
         self.play(orig_func_left_a.animate.set_value(orig_func_left_a.get_value()),
                   orig_func_right_a.animate.set_value(orig_func_right_a.get_value()),
                   run_time=0.001)
-        #self.play(other_func_left_a.animate.set_value(other_func_left_a.get_value()),
-        #          other_func_right_a.animate.set_value(other_func_right_a.get_value()),
-        #          run_time=0.001)
-
-        #self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() + 2),
-        #          other_func_right_b.animate.set_value(other_func_right_b.get_value() + 2),
-        #          run_time = 2)
-        #self.wait() 
-        #self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() - 5),
-        #          other_func_right_b.animate.set_value(other_func_right_b.get_value() - 5),
-        #          run_time = 1)
-        #self.wait()
-        self.play(mending_point.animate.set_value(mending_point.get_value() - 1),
+        self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() + 5),
+                  other_func_right_b.animate.set_value(other_func_right_b.get_value() + 5),
                   run_time = 1)
         self.wait()
+        self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() - 7),
+                  other_func_right_b.animate.set_value(other_func_right_b.get_value() - 7),
+                  run_time = 1)
+        self.wait()
+        self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() + 2),
+                  other_func_right_b.animate.set_value(other_func_right_b.get_value() + 2),
+                  run_time = 1)
+        self.wait()
+
+class horizontal_translation(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        left_end = ValueTracker(-5)
+        right_end = ValueTracker(5)
+        mending_point = ValueTracker(-1)
+        
+        def linear_plot_updater(mobj, plane, x_range, y_range, a, b, J, color_to_set_to, is_silly=False, is_left_to_mending_point = False):
+            if mending_point is not None:
+                if not is_silly:
+                    x_range = [
+                        x_range[0].get_value() - J.get_value(),
+                        x_range[1].get_value() - J.get_value()
+                    ]
+                else:
+                    if is_left_to_mending_point:
+                        x_range = [
+                            x_range[0].get_value(),
+                            x_range[1].get_value() - J.get_value()
+                        ]
+                    else:
+                        x_range = [
+                            x_range[0].get_value() - J.get_value(),
+                            x_range[1].get_value()
+                        ]
+            #print(x_range[1], mending_point.get_value())
+            xr = [
+                (y_range[0]-b.get_value())/a.get_value() - J.get_value(),
+                (y_range[1]-b.get_value())/a.get_value() - J.get_value()
+            ]
+            xr.sort() ## is this needed ??
+            xr = [
+                max(xr[0],x_range[0]),
+                min(xr[1],x_range[1])
+            ]
+            mobj.become(
+                plane.plot(
+                    lambda x: a.get_value()*(x + J.get_value())+b.get_value(),
+                    x_range=xr,
+                ).set_color(color_to_set_to)
+            )
+        ## CACHING MESSES THIS UP, BE CAREFUL
+
+        num_plane = always_redraw(
+            lambda:
+            NumberPlane(
+                x_range=[-5, 5, 5],
+                y_range=[-5, 5, 5],
+                x_length=5,
+                y_length=5,
+                faded_line_ratio=5,
+            )
+        )
+
+        # -4x - 8
+        orig_func_left_a = ValueTracker(-4)
+        orig_func_left_b = ValueTracker(-8)
+        # x - 3
+        orig_func_right_a = ValueTracker(1)
+        orig_func_right_b = ValueTracker(-3)
+        other_func_left_a = ValueTracker(-4)
+        other_func_left_b = ValueTracker(-8)
+        other_func_right_a = ValueTracker(1)
+        other_func_right_b = ValueTracker(-3)
+        other_func_addition = ValueTracker(0)
+        empty_tracker = ValueTracker(0)
+
+        orig_func_left = VMobject()
+        orig_func_right = VMobject()
+        other_func_left = VMobject()
+        other_func_right = VMobject()
+
+        orig_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point],
+            y_range=[-5, 5],
+            a=orig_func_left_a,
+            b=orig_func_left_b,
+            J=empty_tracker,
+            color_to_set_to=BLUE_COLOR
+        )
+        orig_func_left.add_updater(orig_func_left_updater)
+        
+        orig_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point, right_end],
+            y_range=[-5, 5],
+            a=orig_func_right_a,
+            b=orig_func_right_b,
+            J=empty_tracker,
+            color_to_set_to=BLUE_COLOR
+        )
+        orig_func_right.add_updater(orig_func_right_updater)
+        
+        other_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point],
+            y_range=[-5, 5],
+            a=other_func_left_a,
+            b=other_func_left_b,
+            J=other_func_addition,
+            color_to_set_to=OTHER_BLUE_COLOR,
+            is_silly=True,
+            is_left_to_mending_point=True
+        )
+        other_func_left.add_updater(other_func_left_updater)
+        
+        other_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point, right_end],
+            y_range=[-5, 5],
+            a=other_func_right_a,
+            b=other_func_right_b,
+            J=other_func_addition,
+            color_to_set_to=OTHER_BLUE_COLOR,
+            is_silly=True,
+            is_left_to_mending_point=False
+        )
+        other_func_right.add_updater(other_func_right_updater)
+
+        some_stupid_label = always_redraw(
+            lambda: (MathTex(
+                (
+                    "f(x) = g(x " +
+                    ("+" if other_func_addition.get_value() >= 0 else "-")
+                ),
+                "{:.2f}".format(abs(other_func_addition.get_value())),
+                ")",
+                font_size=40
+            ).set_color_by_tex("f(x)", color=BEIGE_COLOR)
+            .set_color_by_tex("{:.2f}".format(abs(other_func_addition.get_value())), color=OTHER_BLUE_COLOR)  # Set color for the value part
+            ).next_to(num_plane.get_bottom(), DOWN)
+            .align_to(num_plane.get_left(), LEFT)
+        )
+
+        self.add(num_plane, some_stupid_label)
+        self.add(other_func_left, other_func_right)
+        self.add(orig_func_left, orig_func_right)
+        self.play(orig_func_left_a.animate.set_value(orig_func_left_a.get_value()),
+                  orig_func_right_a.animate.set_value(orig_func_right_a.get_value()),
+                  run_time=0.001)
+        self.play(other_func_addition.animate.set_value(2))
+        self.wait()
+        self.play(other_func_addition.animate.set_value(-3))
+        self.wait()
+        self.play(other_func_addition.animate.set_value(0))
+        self.wait()
+        # self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() + 5),
+        #           other_func_right_b.animate.set_value(other_func_right_b.get_value() + 5),
+        #           run_time = 1)
+        # self.wait()
+        # self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() - 7),
+        #           other_func_right_b.animate.set_value(other_func_right_b.get_value() - 7),
+        #           run_time = 1)
+        # self.wait()
+        # self.play(other_func_left_b.animate.set_value(other_func_left_b.get_value() + 2),
+        #           other_func_right_b.animate.set_value(other_func_right_b.get_value() + 2),
+        #           run_time = 1)
+        # self.wait()
