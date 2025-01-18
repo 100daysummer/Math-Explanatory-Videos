@@ -12,6 +12,27 @@ ORANGE_COLOR = "#ffc375"         # button-hover-bottom-border-color
 YELLOW_COLOR = "#fdff91"     # button-hover-highlight-color
 MORE_BLUE_COLOR = "#4877a0"
 
+
+class video_intro(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        title = Text("Функции", color=BEIGE_COLOR, font_size=120)
+        title_top_left = Text("Функции", color=BEIGE_COLOR, font_size=45).to_corner(UL)
+        subtitle = Text("V - Трансформации", color=BEIGE_COLOR, font_size=80)
+
+        self.play(Write(title))
+        self.wait()
+
+        self.play(Transform(title, title_top_left), run_time=0.75)
+        self.wait(0.25)
+
+        self.play(Write(subtitle))
+        self.wait(1.5)
+
+        self.play(Unwrite(title), Unwrite(subtitle), run_time=0.5)
+        self.wait()
+
 class testing(Scene):
     def construct(self):
         self.camera.background_color = BACKGROUND_COLOR
