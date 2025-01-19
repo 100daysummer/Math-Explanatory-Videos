@@ -614,6 +614,7 @@ class horizontal_scaling(Scene):
                 plane.plot(
                     lambda x: (a.get_value() * x * J.get_value() + b.get_value()),
                     x_range=xr,
+                    use_smoothing=False
                 ).set_color(color_to_set_to)
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
