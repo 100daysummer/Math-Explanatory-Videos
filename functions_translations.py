@@ -126,7 +126,7 @@ class testing(Scene):
         #         ).plot(
         #             lambda x: np.sin(1 / x),
         #             discontinuities=[0],
-        #             dt = 1e-3,
+        #             dt = 1e-2,
         #             use_smoothing=False,
         #             x_range=[-bla_bla.get_value(), bla_bla.get_value(), bla_bla.get_value()/2000],
         #             color=BLUE_COLOR
@@ -1031,6 +1031,7 @@ class flip_by_y(Scene):
                     font_size=40
                 ).set_color(BEIGE_COLOR)
                 .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
                 .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
                 .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
             ).next_to(num_plane.get_bottom(), DOWN)\
@@ -1040,11 +1041,13 @@ class flip_by_y(Scene):
                     "f(x)",
                     "=",
                     "g(",
-                    "-x",
+                    "-",
+                    "x",
                     ")",
                     font_size=40
                 ).set_color(BEIGE_COLOR)
                 .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
                 .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
                 .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
             ).next_to(num_plane.get_bottom(), DOWN)\
@@ -1059,6 +1062,7 @@ class flip_by_y(Scene):
                     font_size=40
                 ).set_color(BEIGE_COLOR)
                 .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
                 .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
                 .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
             ).next_to(num_plane.get_bottom(), DOWN)\
@@ -1091,5 +1095,604 @@ class flip_by_y(Scene):
             mending_point_2.animate.set_value(-mending_point_2.get_value()),
             Transform(some_stupid_label, some_stupid_label_3),
             run_time=1
+        )
+        self.wait()
+ 
+# Graphs f(x) = |g(x)|
+class reflect_by_x(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        left_end = ValueTracker(-5)
+        right_end = ValueTracker(5)
+        mending_point_1 = ValueTracker(-1)
+        mending_point_2 = ValueTracker(-1)
+        
+        def linear_plot_updater(mobj, plane, x_range, y_range, a, b, color_to_set_to, merge_point = None, is_abs = False):
+            if merge_point is not None:
+                x_range = [
+                    x_range[0].get_value(),
+                    x_range[1].get_value() 
+                ]
+            #print(x_range[1], mending_point.get_value())
+            xr = [
+                (((y_range[0]) - b.get_value()) / a.get_value() if a.get_value() != 0 else 0),
+                (((y_range[1]) - b.get_value()) / a.get_value() if a.get_value() != 0 else 0)
+            ]
+            xr.sort() ## is this needed ??
+            xr = [
+                max(xr[0],x_range[0]),
+                min(xr[1],x_range[1])
+            ]
+            if is_abs:
+                mobj.become(
+                    plane.plot(
+                        lambda x: abs(a.get_value() * x + b.get_value()),
+                        x_range=xr,
+                        discontinuities = [-b.get_value() / a.get_value()],
+                        dt=1e-3,
+                        use_smoothing=False,
+                    ).set_color(color_to_set_to)
+                )
+            else:
+                mobj.become(
+                    plane.plot(
+                        lambda x: a.get_value() * x + b.get_value(),
+                        x_range=xr,
+                        use_smoothing=False,
+                    ).set_color(color_to_set_to)
+                )
+        ## CACHING MESSES THIS UP, BE CAREFUL
+
+        num_plane = always_redraw(
+            lambda:
+            NumberPlane(
+                x_range=[-5, 5, 5],
+                y_range=[-5, 5, 5],
+                x_length=5,
+                y_length=5,
+                faded_line_ratio=5,
+            )
+        )
+
+        # -4x - 8
+        orig_func_left_a = ValueTracker(-4)
+        orig_func_left_b = ValueTracker(-8)
+        # x - 3
+        orig_func_right_a = ValueTracker(1)
+        orig_func_right_b = ValueTracker(-3)
+        other_func_left_a = ValueTracker(-4)
+        other_func_left_b = ValueTracker(-8)
+        other_func_right_a = ValueTracker(1)
+        other_func_right_b = ValueTracker(-3)
+
+        orig_func_left = VMobject()
+        orig_func_right = VMobject()
+        other_func_left = VMobject()
+        other_func_right = VMobject()
+        other_func_left_2 = VMobject()
+        other_func_right_2 = VMobject()
+
+        ORIG_FUNC_COLOR = MORE_BLUE_COLOR
+        OTHER_FUNC_COLOR = BLUE_COLOR
+
+        orig_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_1],
+            y_range=[-5, 5],
+            a=orig_func_left_a,
+            b=orig_func_left_b,
+            color_to_set_to=ORIG_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        orig_func_left.add_updater(orig_func_left_updater)
+        
+        orig_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_1, right_end],
+            y_range=[-5, 5],
+            a=orig_func_right_a,
+            b=orig_func_right_b,
+            color_to_set_to=ORIG_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        orig_func_right.add_updater(orig_func_right_updater)
+        
+        other_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_2],
+            y_range=[-5, 5],
+            a=other_func_left_a,
+            b=other_func_left_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_2,
+            is_abs = True
+        )
+        other_func_left.add_updater(other_func_left_updater)
+        
+        other_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_2, right_end],
+            y_range=[-5, 5],
+            a=other_func_right_a,
+            b=other_func_right_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_2,
+            is_abs = True
+        )
+        other_func_right.add_updater(other_func_right_updater)
+
+        other_func_left_updater_2 = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_1],
+            y_range=[-5, 5],
+            a=orig_func_left_a,
+            b=orig_func_left_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        other_func_left_2.add_updater(other_func_left_updater_2)
+        
+        other_func_right_updater_2 = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_1, right_end],
+            y_range=[-5, 5],
+            a=orig_func_right_a,
+            b=orig_func_right_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        other_func_right_2.add_updater(other_func_right_updater_2)
+
+        some_stupid_label = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(",
+                    "x",
+                    ")",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+        some_stupid_label_2 = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "|",
+                    "g(x)",
+                    "|",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+        some_stupid_label_3 = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(x)",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+
+        self.add(num_plane, some_stupid_label)
+        self.add(orig_func_left, orig_func_right)
+        self.add(other_func_left_2, other_func_right_2)
+        self.play(
+            orig_func_left_a.animate.set_value(orig_func_left_a.get_value()),
+            orig_func_right_a.animate.set_value(orig_func_right_a.get_value()),
+            run_time=0.001
+        )
+        self.wait()
+        self.play(
+            Transform(other_func_left_2, other_func_left),
+            Transform(other_func_right_2, other_func_right),
+            Transform(some_stupid_label, some_stupid_label_2)
+        )
+        self.add(other_func_left, other_func_right)
+        self.remove(other_func_left_2, other_func_right_2)
+        self.wait()
+        self.play(
+            Transform(other_func_left, other_func_left_2),
+            Transform(other_func_right, other_func_right_2),
+            Transform(some_stupid_label, some_stupid_label_3)
+        )
+        self.remove(other_func_left, other_func_right)
+        self.add(other_func_left_2, other_func_right_2)
+        self.wait()
+
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        left_end = ValueTracker(-5)
+        right_end = ValueTracker(5)
+        mending_point_1 = ValueTracker(-1)
+        mending_point_2 = ValueTracker(-1)
+        
+        def linear_plot_updater(mobj, plane, x_range, y_range, a, b, color_to_set_to, merge_point = None):
+            if merge_point is not None:
+                x_range = [
+                    x_range[0].get_value(),
+                    x_range[1].get_value() 
+                ]
+            #print(x_range[1], mending_point.get_value())
+            xr = [
+                (((y_range[0]) - b.get_value()) / a.get_value() if a.get_value() != 0 else 0),
+                (((y_range[1]) - b.get_value()) / a.get_value() if a.get_value() != 0 else 0)
+            ]
+            xr.sort() ## is this needed ??
+            xr = [
+                max(xr[0],x_range[0]),
+                min(xr[1],x_range[1])
+            ]
+            mobj.become(
+                plane.plot(
+                    lambda x: (a.get_value() * x + b.get_value()),
+                    x_range=xr,
+                    use_smoothing=False,
+                ).set_color(color_to_set_to)
+            )
+        ## CACHING MESSES THIS UP, BE CAREFUL
+
+        num_plane = always_redraw(
+            lambda:
+            NumberPlane(
+                x_range=[-5, 5, 5],
+                y_range=[-5, 5, 5],
+                x_length=5,
+                y_length=5,
+                faded_line_ratio=5,
+            )
+        )
+
+        # -4x - 8
+        orig_func_left_a = ValueTracker(-4)
+        orig_func_left_b = ValueTracker(-8)
+        # x - 3
+        orig_func_right_a = ValueTracker(1)
+        orig_func_right_b = ValueTracker(-3)
+        other_func_left_a = ValueTracker(-4)
+        other_func_left_b = ValueTracker(-8)
+        other_func_right_a = ValueTracker(1)
+        other_func_right_b = ValueTracker(-3)
+
+        orig_func_left = VMobject()
+        orig_func_right = VMobject()
+        other_func_left = VMobject()
+        other_func_right = VMobject()
+
+        ORIG_FUNC_COLOR = MORE_BLUE_COLOR
+        OTHER_FUNC_COLOR = BLUE_COLOR
+
+        orig_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_1],
+            y_range=[-5, 5],
+            a=orig_func_left_a,
+            b=orig_func_left_b,
+            color_to_set_to=ORIG_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        orig_func_left.add_updater(orig_func_left_updater)
+        
+        orig_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_1, right_end],
+            y_range=[-5, 5],
+            a=orig_func_right_a,
+            b=orig_func_right_b,
+            color_to_set_to=ORIG_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        orig_func_right.add_updater(orig_func_right_updater)
+        
+        other_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_2],
+            y_range=[-5, 5],
+            a=other_func_left_a,
+            b=other_func_left_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_2
+        )
+        other_func_left.add_updater(other_func_left_updater)
+        
+        other_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_2, right_end],
+            y_range=[-5, 5],
+            a=other_func_right_a,
+            b=other_func_right_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_2
+        )
+        other_func_right.add_updater(other_func_right_updater)
+
+        some_stupid_label = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(",
+                    "x",
+                    ")",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+        some_stupid_label_2 = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(",
+                    "-",
+                    "x",
+                    ")",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+        some_stupid_label_3 = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(",
+                    "x",
+                    ")",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+
+        self.add(num_plane, some_stupid_label)
+        self.add(orig_func_left, orig_func_right)
+        self.add(other_func_left, other_func_right)
+        self.play(
+            orig_func_left_a.animate.set_value(orig_func_left_a.get_value()),
+            orig_func_right_a.animate.set_value(orig_func_right_a.get_value()),
+            run_time=0.001
+        )
+        self.wait()
+        self.play(
+            other_func_left_a.animate.set_value(-other_func_right_a.get_value()),
+            other_func_left_b.animate.set_value(other_func_right_b.get_value()),
+            other_func_right_a.animate.set_value(-other_func_left_a.get_value()),
+            other_func_right_b.animate.set_value(other_func_left_b.get_value()),
+            mending_point_2.animate.set_value(-mending_point_2.get_value()),
+            Transform(some_stupid_label, some_stupid_label_2),
+            run_time=1
+        )
+        self.wait()
+        self.play(
+            other_func_left_a.animate.set_value(-other_func_right_a.get_value()),
+            other_func_left_b.animate.set_value(other_func_right_b.get_value()),
+            other_func_right_a.animate.set_value(-other_func_left_a.get_value()),
+            other_func_right_b.animate.set_value(other_func_left_b.get_value()),
+            mending_point_2.animate.set_value(-mending_point_2.get_value()),
+            Transform(some_stupid_label, some_stupid_label_3),
+            run_time=1
+        )
+        self.wait()
+ 
+# Graphs f(x) = g(|x|)
+class reflect_by_y(Scene):
+    def construct(self):
+        self.camera.background_color = BACKGROUND_COLOR
+
+        left_end = ValueTracker(-5)
+        right_end = ValueTracker(5)
+        mending_point_1 = ValueTracker(-1)
+        mending_point_2 = ValueTracker(-1)
+        
+        def linear_plot_updater(mobj, plane, x_range, y_range, a, b, color_to_set_to, merge_point = None, is_abs = False):
+            if merge_point is not None:
+                x_range = [
+                    x_range[0].get_value(),
+                    x_range[1].get_value() 
+                ]
+            #print(x_range[1], mending_point.get_value())
+            xr = [
+                (((y_range[0]) - b.get_value()) / a.get_value() if a.get_value() != 0 else 0),
+                (((y_range[1]) - b.get_value()) / a.get_value() if a.get_value() != 0 else 0)
+            ]
+            xr.sort() ## is this needed ??
+            xr = [
+                max(xr[0],x_range[0]),
+                min(xr[1],x_range[1])
+            ]
+            print(xr)
+            mobj.become(
+                plane.plot(
+                    lambda x: a.get_value() * x + b.get_value(),
+                    x_range=xr,
+                    use_smoothing=False,
+                ).set_color(color_to_set_to)
+            )
+        ## CACHING MESSES THIS UP, BE CAREFUL
+
+        num_plane = always_redraw(
+            lambda:
+            NumberPlane(
+                x_range=[-5, 5, 5],
+                y_range=[-5, 5, 5],
+                x_length=5,
+                y_length=5,
+                faded_line_ratio=5,
+            )
+        )
+
+        # -4x - 8
+        orig_func_left_a = ValueTracker(-4)
+        orig_func_left_b = ValueTracker(-8)
+        # x - 3
+        orig_func_right_a = ValueTracker(1)
+        orig_func_right_b = ValueTracker(-3)
+
+        other_func_left_a = ValueTracker(-4)
+        other_func_left_b = ValueTracker(-8)
+        other_func_right_a = ValueTracker(1)
+        other_func_right_b = ValueTracker(-3)
+
+        orig_func_left = VMobject()
+        orig_func_right = VMobject()
+        other_func_left = VMobject()
+        other_func_right = VMobject()
+
+        ORIG_FUNC_COLOR = MORE_BLUE_COLOR
+        OTHER_FUNC_COLOR = BLUE_COLOR
+
+        orig_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_1],
+            y_range=[-5, 5],
+            a=orig_func_left_a,
+            b=orig_func_left_b,
+            color_to_set_to=ORIG_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        orig_func_left.add_updater(orig_func_left_updater)
+        
+        orig_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_1, right_end],
+            y_range=[-5, 5],
+            a=orig_func_right_a,
+            b=orig_func_right_b,
+            color_to_set_to=ORIG_FUNC_COLOR,
+            merge_point = mending_point_1
+        )
+        orig_func_right.add_updater(orig_func_right_updater)
+        
+        other_func_left_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[left_end, mending_point_2],
+            y_range=[-5, 5],
+            a=other_func_left_a,
+            b=other_func_left_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_2,
+            is_abs = True
+        )
+        other_func_left.add_updater(other_func_left_updater)
+        
+        other_func_right_updater = partial(
+            linear_plot_updater,
+            plane=num_plane,
+            x_range=[mending_point_2, right_end],
+            y_range=[-5, 5],
+            a=other_func_right_a,
+            b=other_func_right_b,
+            color_to_set_to=OTHER_FUNC_COLOR,
+            merge_point = mending_point_2,
+            is_abs = True
+        )
+        other_func_right.add_updater(other_func_right_updater)
+
+        some_stupid_label = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(",
+                    "x",
+                    ")",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+        some_stupid_label_2 = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(",
+                    "|",
+                    "x",
+                    "|",
+                    ")",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+        some_stupid_label_3 = (
+                MathTex(
+                    "f(x)",
+                    "=",
+                    "g(x)",
+                    font_size=40
+                ).set_color(BEIGE_COLOR)
+                .set_color_by_tex(")", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("x", color=ORIG_FUNC_COLOR)
+                .set_color_by_tex("f(x)", color=OTHER_FUNC_COLOR)
+                .set_color_by_tex("g(", color=ORIG_FUNC_COLOR)
+            ).next_to(num_plane.get_bottom(), DOWN)\
+            .align_to(num_plane.get_left(), LEFT)
+
+        self.add(num_plane, some_stupid_label)
+        self.add(orig_func_left, orig_func_right)
+        self.add(other_func_left, other_func_right)
+        self.play(
+            orig_func_left_a.animate.set_value(orig_func_left_a.get_value()),
+            orig_func_right_a.animate.set_value(orig_func_right_a.get_value()),
+            run_time=0.001
+        )
+        self.wait()
+
+        self.play(
+            other_func_left_a.animate.set_value(orig_func_right_a.get_value() * -1),
+            other_func_left_b.animate.set_value(orig_func_right_b.get_value()),
+            mending_point_2.animate.set_value(0),
+            Transform(some_stupid_label, some_stupid_label_2)
+        )
+        self.wait()
+        self.play(
+            other_func_left_a.animate.set_value(-4),
+            other_func_left_b.animate.set_value(-8),
+            mending_point_2.animate.set_value(-1),
+            Transform(some_stupid_label, some_stupid_label_3)
         )
         self.wait()
