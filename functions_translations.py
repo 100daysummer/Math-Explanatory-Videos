@@ -166,6 +166,7 @@ class vertical_translation(Scene):
                 plane.plot(
                     lambda x: a.get_value()*x+b.get_value(),
                     x_range=xr,
+                    use_smoothing=False,
                 ).set_color(color_to_set_to)
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
@@ -319,6 +320,7 @@ class horizontal_translation(Scene):
                 plane.plot(
                     lambda x: a.get_value()*(x + J.get_value())+b.get_value(),
                     x_range=xr,
+                    use_smoothing=False,
                 ).set_color(color_to_set_to)
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
@@ -465,6 +467,7 @@ class vertical_scaling(Scene):
                 plane.plot(
                     lambda x: (a.get_value()*x+b.get_value()) * J.get_value(),
                     x_range=xr,
+                    use_smoothing=False,
                 ).set_color(color_to_set_to)
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
@@ -761,6 +764,7 @@ class flip_by_x(Scene):
                 plane.plot(
                     lambda x: (a.get_value() * x + b.get_value()),
                     x_range=xr,
+                    use_smoothing=False,
                 ).set_color(color_to_set_to)
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
@@ -934,6 +938,7 @@ class flip_by_y(Scene):
                 plane.plot(
                     lambda x: (a.get_value() * x + b.get_value()),
                     x_range=xr,
+                    use_smoothing=False,
                 ).set_color(color_to_set_to)
             )
         ## CACHING MESSES THIS UP, BE CAREFUL
