@@ -557,7 +557,7 @@ class vertical_scaling(Scene):
                 "f(x)",
                 "=",
                 "g(x)",
-                "*",
+                "\\times",
                 "{:.2f}".format(scaling_factor.get_value()),
                 font_size=40
             ).set_color(BEIGE_COLOR)
@@ -708,7 +708,7 @@ class horizontal_scaling(Scene):
                 "f(x)",
                 "=",
                 "g(x",
-                "*",
+                "\\times",
                 "{:.2f}".format(scaling_factor.get_value()),
                 ")",
                 font_size=40
